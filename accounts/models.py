@@ -9,12 +9,13 @@ class Profile(models.Model):
     avatar = models.ImageField(default = '/profile/avatar.png', upload_to = 'media/profile')
     username = models.CharField(max_length = 100)
     about = models.CharField(max_length = 300, null = True,  blank = True)
-
+    followers = models.ManyToManyField(User, related_name = 'followers')
+    
     def save(self, *args, **kwargs):
         self.username = User.objects.get(id = self.user.id).username
         super(Profile, self).save(*args, **kwargs)
 
-
+        
 
     def __str__(self):
         return self.user.username

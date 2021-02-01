@@ -18,9 +18,9 @@ class Categories(models.TextChoices):
 
 class Blog (models.Model):
     author = models.ForeignKey(Profile, on_delete = models.CASCADE)
-    title =  models.CharField(max_length = 50)
+    title =  models.CharField(max_length = 100)
     slug = models.SlugField()
-    category = models.CharField(max_length = 50, choices = Categories.choices, default = Categories.SPORT)
+    category = models.CharField(max_length = 100, choices = Categories.choices, default = Categories.SPORT)
     pic = models.ImageField(upload_to = 'pictures/%y/%m/%d')
     hint = models.CharField(max_length =100)
     content = models.TextField()

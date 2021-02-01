@@ -58,7 +58,7 @@ class AddUser(APIView):
 
         except UserDoesNotExist:
             return Response({"mesage":"user does not exist"})
-        
+
         request.POST._mutable = True
         serializer = UserEditSerializer(user, data = request.data)
         if serializer.is_valid():
@@ -67,12 +67,6 @@ class AddUser(APIView):
             return Response(serializer.data, status=201)
 
         return Response(serializer.errors, status = 400)
-
-
-
-
-
-
 
 class MyProfile(APIView):
     serializer_class = ProfileSerializer
@@ -87,7 +81,7 @@ class MyProfile(APIView):
 
         request.data['user'] = request.user.username
         if request.data['avatar'] == set.avatar.url:
-           request.data['avatar'] =set.avatar 
+           request.data['avatar'] =set.avatar
            print(request.data)
         serializer = EditProfileSerializer(set, data=request.data)
         if serializer.is_valid():
@@ -95,7 +89,8 @@ class MyProfile(APIView):
             return Response(serializer.data, status = 201)
 
         return Response(serializer.errors, status = 400)
-   
+
+
     def get(self, request):
         try:
             profile = Profile.objects.get(user = request.user.id)
@@ -105,9 +100,34 @@ class MyProfile(APIView):
         serializer = ProfileSerializer(profile)
         return Response(serializer.data)
 
+class Follow(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self,request,id):
+        try:
+            profile = Profile.objects.get(id = id)
+
+        except Profile.DoesNotExist:
+            return Response('profile not found', status = 404)
+
+        following = False
+        num_followers = 0
+        if profile.followers.filter(id = request.user.id).exist():
+            profile.followers.remove(request.user)
+
+        else :
+            profile.followes.add(reuest.user)
+            following = True
+
+        num_followers = profile.followers.count()
+
+        return Response({'num_followers':num_followers, 'following':following})
+
+
+
 class Info(APIView):
     serializer_class = ProfileSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self,request,id):
         try:
@@ -115,7 +135,7 @@ class Info(APIView):
 
         except Blog.DoesNotExist:
             return Response({'message':'profile doesnt exist'})
-        
+
         posts = Blog.objects.filter(author = profile.id)
         num_post = posts.count()
         average_likes= 0
@@ -127,13 +147,19 @@ class Info(APIView):
             comments = Comment.objects.filter(article=post.id).count()
             average_likes =average_likes + likes
             num_comments = num_comments + comments
- 
+
+        num_followers = profile.followers.count()
+        following = False
+        if profile.followers.filter(id = request.user.id).exist():
+            following = True
+
 
         serializer = ProfileSerializer(profile)
         response = {}
         response['average_likes'] = average_likes
         response['num_post'] =  num_post
+        response['num_followers'] =  num_followers
+        response['following'] =  following
         response['comments'] =  num_comments
         response['profile'] = serializer.data
         return Response(response, status = 200)
-        
