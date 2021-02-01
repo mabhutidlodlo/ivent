@@ -8,5 +8,5 @@ urlpatterns = [
     path('profile/', MyProfile.as_view()),
     path('info/<int:id>',Info.as_view()),
     path('add_user/',AddUser.as_view()),
-    path('follow/id',Follow.as_view()),
+    path('follow/<int:id>',Follow.as_view()),
 ]

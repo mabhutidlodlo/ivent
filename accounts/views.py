@@ -101,7 +101,7 @@ class MyProfile(APIView):
         return Response(serializer.data)
 
 class Follow(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def post(self,request,id):
         try:
@@ -112,11 +112,11 @@ class Follow(APIView):
 
         following = False
         num_followers = 0
-        if profile.followers.filter(id = request.user.id).exist():
+        if profile.followers.filter(id = request.user.id).exists():
             profile.followers.remove(request.user)
 
         else :
-            profile.followes.add(reuest.user)
+            profile.followers.add(request.user)
             following = True
 
         num_followers = profile.followers.count()
@@ -127,13 +127,13 @@ class Follow(APIView):
 
 class Info(APIView):
     serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get(self,request,id):
         try:
             profile= Profile.objects.get(id = id)
 
-        except Blog.DoesNotExist:
+        except Profile.DoesNotExist:
             return Response({'message':'profile doesnt exist'})
 
         posts = Blog.objects.filter(author = profile.id)
@@ -150,7 +150,7 @@ class Info(APIView):
 
         num_followers = profile.followers.count()
         following = False
-        if profile.followers.filter(id = request.user.id).exist():
+        if profile.followers.filter(id = request.user.id).exists():
             following = True
 
 
