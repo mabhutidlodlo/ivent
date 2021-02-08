@@ -10,6 +10,9 @@ from .models import Profile
 from blog.models import Blog
 from blog.models import Comment
 from rest_framework.parsers import MultiPartParser,FormParser
+from blog.consumer import NotificationConsumer
+from asgiref.sync import async_to_sync
+import channels.layers
 
 # Create your views here.
 
@@ -44,8 +47,8 @@ class Login(APIView):
             response['user'] = serializer.data
             response['token'] = token.key
             response['profile']=ProfileSerializer(profile).data
-            return Response(response)
-        return Response(serializer.errors)
+            return Response(response,status = 200)
+        return Response(serializer.errors,status =400)
 
 class AddUser(APIView):
     serializer_class = UserEditSerializer
@@ -112,24 +115,33 @@ class Follow(APIView):
 
         following = False
         num_followers = 0
+
+        myProfile = Profile.objects.get(id = request.user.id)
+
         if profile.followers.filter(id = request.user.id).exists():
             profile.followers.remove(request.user)
+            myProfile.following.remove(profile.user)
+
 
         else :
             profile.followers.add(request.user)
-            following = True
+            myProfile.following.add(profile.user)
 
+
+            following = True
+        num_following = myProfile.following.count()
         num_followers = profile.followers.count()
 
-        return Response({'num_followers':num_followers, 'following':following})
+        return Response({'num_followers':num_followers, 'following':following, 'num_following':num_following})
 
 
 
 class Info(APIView):
+
     serializer_class = ProfileSerializer
     permission_classes = [permissions.AllowAny]
-
     def get(self,request,id):
+
         try:
             profile= Profile.objects.get(id = id)
 
@@ -143,14 +155,17 @@ class Info(APIView):
         likes =0
         CommentS=0
         for post in posts:
+
             likes = post.claps.all().count()+ likes
             comments = Comment.objects.filter(article=post.id).count()
             average_likes =average_likes + likes
             num_comments = num_comments + comments
 
+        num_following = profile.following.count()
         num_followers = profile.followers.count()
         following = False
         if profile.followers.filter(id = request.user.id).exists():
+
             following = True
 
 
@@ -158,8 +173,17 @@ class Info(APIView):
         response = {}
         response['average_likes'] = average_likes
         response['num_post'] =  num_post
+        response['num_following'] = num_following
         response['num_followers'] =  num_followers
         response['following'] =  following
         response['comments'] =  num_comments
         response['profile'] = serializer.data
+
         return Response(response, status = 200)
+
+class Logout(APIView):
+    serializer_class = LoginSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self,request):
+        return Response({'message':'logged out'})

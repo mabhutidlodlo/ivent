@@ -21,9 +21,12 @@ class LoginSerializer(serializers.Serializer):
         def validate(self, attrs):
             username = attrs.get("username")
             password = attrs.get("password")
+            if len(username)>0 and len(password)> 0:
+                user = authenticate(username=username, password=password)
 
-            user = authenticate(username=username, password=password)
-
+            else:
+                raise serializers.ValidationError("make sure all fields are field")
+                
             if user:
                 attrs["user"] = user
                 return attrs
@@ -36,7 +39,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model =Profile
         fields = "__all__"
-    
+
 class EditProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model =Profile
@@ -46,6 +49,3 @@ class UserEditSerializer(serializers.ModelSerializer):
     class Meta:
         model =User
         fields = ["username"]
-
-
-    

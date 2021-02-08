@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
 # Create your models here.
 class Profile(models.Model):
 
@@ -10,12 +11,14 @@ class Profile(models.Model):
     username = models.CharField(max_length = 100)
     about = models.CharField(max_length = 300, null = True,  blank = True)
     followers = models.ManyToManyField(User, related_name = 'followers')
-    
+    following = models.ManyToManyField(User, related_name = 'following')
+
+
     def save(self, *args, **kwargs):
         self.username = User.objects.get(id = self.user.id).username
         super(Profile, self).save(*args, **kwargs)
 
-        
+
 
     def __str__(self):
         return self.user.username

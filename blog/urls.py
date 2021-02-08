@@ -14,5 +14,6 @@ urlpatterns = [
     path('mycomment/<int:pk>',views.MyComment.as_view()),
     path('claps/<str:slug>',views.Claps.as_view()),
     path('myPost',views.MyBlog.as_view()),
+    path('subscribedArticles',views.SubscribedArticles.as_view()),
     path('getAuthor/<str:slug>', views.GetAuthor.as_view()),
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

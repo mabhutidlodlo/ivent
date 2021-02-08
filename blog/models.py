@@ -3,6 +3,11 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
 from accounts.models import Profile
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from .consumer import NotificationConsumer
+from asgiref.sync import async_to_sync
+import channels.layers
 # Create your models here.
 
 class Categories(models.TextChoices):
@@ -58,6 +63,8 @@ class Blog (models.Model):
     def __str__(self):
         return self.title
 
+
+
 class Comment(models.Model):
     article = models.ForeignKey(Blog, on_delete = models.CASCADE)
     author = models.ForeignKey(Profile, on_delete = models.CASCADE)
@@ -66,3 +73,18 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.article.title
+
+    @receiver(post_save, sender =Blog )
+    def create_new_blog(sender, created, instance, **kwargs):
+
+        if created:
+
+            channel_layer = channels.layers.get_channel_layer()
+            group_name = instance.author.username
+            async_to_sync(channel_layer.group_send)(
+            group_name,
+                {
+                'type': 'notification_message',
+                'message': 'new article',
+                }
+            )

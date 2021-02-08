@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView , RetrieveAPIView
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from .models import Blog, Comment 
+from .models import Blog, Comment
 from accounts.models import Profile
 from accounts.serializer import ProfileSerializer
 from .serializers import ArticleDetailSerializer,CommentDetailSerializer, BlogSerializer,PostBlogSerializer ,  CommentSerializer
@@ -27,7 +27,7 @@ class CategoryBlogs(APIView):
         serializer = BlogSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    
+
 class MyBlog(APIView):
     serializer_class = PostBlogSerializer
     permission_classes = [IsAuthenticated]
@@ -43,12 +43,24 @@ class MyBlog(APIView):
 
     def get(self, request, fomart=None):
         try:
-            queryset = Blog.objects.filter(author = Profile.objects.get(user = request.user))
+            queryset = Blog.objects.order_by('date_created').filter(author = Profile.objects.get(user = request.user))
         except Blog.DoesNotExist:
             return Response({"no articles"}, status =404)
         serializer = BlogSerializer(queryset, many = True)
         return Response(serializer.data,content_type='image/*',status = 200)
 
+class SubscribedArticles(APIView):
+    serializer_class = BlogSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    def get(self,request):
+        articles = {}
+        profiles = Profile.objects.get(id = request.user.id).following.all()
+        for prof in profiles:
+            article = Blog.objects.order_by('-date_created').filter(author =prof.id )
+            articles=article
+        serializer = BlogSerializer(articles, many=True)
+
+        return Response(serializer.data, status = 200)
 
 class Blogs(APIView):
     serializer_class = BlogSerializer
@@ -59,9 +71,9 @@ class Blogs(APIView):
             queryset = Blog.objects.get(slug = slug)
         except ObjectDoesNotExist:
             return Response({"The article does not exist it may be deleted"})
-    
+
         serializer = ArticleDetailSerializer(Blog.objects.get(slug=slug))
-        return Response(serializer.data,content_type='image/*', status = 200) 
+        return Response(serializer.data,content_type='image/*', status = 200)
 
     def put(self,request, slug):
         try:
@@ -86,7 +98,7 @@ class Blogs(APIView):
             queryObject = Blog.objects.get(slug = slug)
         except Blog.DoesNotExist:
             return Response({"article does not exist, it may be deleted"}, status = 404)
-        
+
         if queryObject.author.id == request.user.id:
             queryObject.delete()
             return Response({"article successfully deleted"},status=200)
@@ -95,7 +107,7 @@ class Blogs(APIView):
 
 class Claps(APIView):
     permission_classes = [IsAuthenticated]
-    def post(self, request, slug):  
+    def post(self, request, slug):
         try:
             queryObject = Blog.objects.get(slug = slug)
         except Blog.DoesNotExist:
@@ -103,11 +115,11 @@ class Claps(APIView):
 
         if queryObject.claps.filter(id = request.user.id).exists():
             queryObject.claps.remove(request.user)
-            claped = False 
+            claped = False
             num_claps = queryObject.claps_count()
         else:
             queryObject.claps.add(request.user)
-            claped = True 
+            claped = True
             num_claps = queryObject.claps_count()
 
         comments = Comment.objects.filter(article = queryObject.id).count()
@@ -118,14 +130,14 @@ class Claps(APIView):
         try:
             queryObject = Blog.objects.get(slug = slug)
         except Blog.DoesNotExist:
-            return Response({"article does not exist"},status = 404)    
-        claped = False 
+            return Response({"article does not exist"},status = 404)
+        claped = False
         if queryObject.claps.filter(id= request.user.id).exists():
-            claped = True 
+            claped = True
         data = {"user_clapped":claped, "num_claps": queryObject.claps_count()}
 
         return Response(data,status =200)
-        
+
 class Comments(APIView):
 
     serializer_class = CommentSerializer
@@ -148,7 +160,7 @@ class Comments(APIView):
         except Comment.DoesNotExist:
             return Response({"no comments"})
         serializer = CommentDetailSerializer(queryset, many = True)
-        return Response(serializer.data, status = 200) 
+        return Response(serializer.data, status = 200)
 
 
 class MyComment(APIView):
@@ -158,7 +170,7 @@ class MyComment(APIView):
             queryset = Comment.objects.get(id = pk)
         except Comment.DoesNotExist:
             return Response({"comment does not exist it may be deleted"}, status = 404)
-       
+
         request.POST._mutable = True
         data = request.data
         data['author'] = request.user.id
@@ -173,7 +185,7 @@ class MyComment(APIView):
             queryObject = Comment.objects.get(id=pk)
         except Comment.DoesNotExist:
             return Response({"comment does not exist, it may be deleted"}, status = 404)
-        
+
         if queryObject.author == request.user:
             queryObject.delete()
             return Response({"message":"comment successfully deleted"},status = 200)
@@ -193,5 +205,3 @@ class GetAuthor(APIView):
 
         serializer = ProfileSerializer(set, many=True)
         return Response(serializer.data, status =200)
-
-
