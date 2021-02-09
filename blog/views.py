@@ -21,7 +21,7 @@ class ListBlogs(ListAPIView):
 
 class CategoryBlogs(APIView):
     serializer_class = BlogSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     def get(self, request, category):
         queryset = Blog.objects.order_by('-date_created').filter(category = category)
         serializer = BlogSerializer(queryset, many=True)
