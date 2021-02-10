@@ -38,14 +38,13 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
 
-    async def disconnect(self,LOCATION):
-        group_name = 'new_group'
+    async def disconnect(self):
+        for group in await self.get_all_users(id):
         # Leave all room group
-        await self.channel_layer.group_discard(
-                group_name,
-                self.channel_name
-                )
-
+            await self.channel_layer.group_discard(
+                    group.username,
+                    self.channel_name
+                    )
 
     # Receive message from WebSocket
     async def receive(self, text_data):
