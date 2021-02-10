@@ -38,7 +38,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
 
-    async def disconnect(self):
+    async def disconnect(self,LOCATION):
         group_name = 'new_group'
         # Leave all room group
         await self.channel_layer.group_discard(
