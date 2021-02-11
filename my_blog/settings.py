@@ -97,12 +97,14 @@ DATABASES = {
 
 
 #redis layer
+redis_host = os.environ.get('REDIS_HOST', 'localhost')    
+
 ASGI_APPLICATION = 'my_blog.routing.application'
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
+            "hosts": [(redis_host, 6379)],
         },
 
     },
