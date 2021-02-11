@@ -38,7 +38,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
 
-    async def disconnect(self, LOCATION):
+    async def disconnect(self):
         id = self.scope['url_route']['kwargs']['id']
         for group in await self.get_all_users(id):
         # Leave all room group
