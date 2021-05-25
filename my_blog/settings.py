@@ -179,9 +179,9 @@ UNICODE_JSON = True
 
 # Cloudinary stuff
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': dwx9ekfet,
-    'API_KEY': 639237151218335,
-    'API_SECRET': Lap785or3wcGbpwRtBJHWW46_c4,
+    'CLOUD_NAME': "dwx9ekfet",
+    'API_KEY': "639237151218335",
+    'API_SECRET': "Lap785or3wcGbpwRtBJHWW46_c4",
 }
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
