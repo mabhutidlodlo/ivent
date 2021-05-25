@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import os
 import django_heroku
+import cloudinary
+import cloudinary_storage
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -48,6 +50,9 @@ INSTALLED_APPS = [
     'django_summernote',
     'accounts',
     'blog',
+    # Media Cloudinary
+    'cloudinary',
+    'cloudinary_storage',
 
 ]
 
@@ -171,6 +176,16 @@ UNICODE_JSON = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
+
+# Cloudinary stuff
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': dwx9ekfet,
+    'API_KEY': 639237151218335,
+    'API_SECRET': Lap785or3wcGbpwRtBJHWW46_c4,
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
