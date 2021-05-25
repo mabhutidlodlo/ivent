@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '5p#7m6+0eg^y#_$409gvbs@m19z251#0yy3r!iw!%)o-l0&xwk'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
 '*'
@@ -67,8 +67,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'my_blog.urls'
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = False
-CORS_ALLOW_HEADERS = ['*']
 
 TEMPLATES = [
     {
@@ -178,7 +176,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
 os.path.join(BASE_DIR,'build/static')
 ]
-STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_ROOT = os.path.join(BASE_DIR,'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
